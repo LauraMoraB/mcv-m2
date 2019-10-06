@@ -13,7 +13,7 @@ dom2Inp_ext (2:end-1, 2:end-1) = dom2Inp;
 nPixels = (ni+2)*(nj+2); %Number of pixels
 
 %We will create A sparse, this is the number of nonzero positions
-nnz_A = nPixels + 4*nnz(dom2Inp);
+nnz_A = nPixels + 4*nnz(dom2Inp) + 2*(ni+2) + 2*(nj+2);
 
 %idx_Ai: Vector for the nonZero i index of matrix A
 %idx_Aj: Vector for the nonZero j index of matrix A
@@ -40,11 +40,11 @@ for j = 1:nj+2
     a_ij(idx) = 1;
     idx = idx+1;
     
-    %idx_Ai(idx) = p;
-    %idx_Aj(idx) = p+1;
-    %a_ij(idx) = -1;
-    %idx = idx+1;
-            
+    idx_Ai(idx) = p;
+    idx_Aj(idx) = p+1;
+    a_ij(idx) = -1;
+    idx = idx+1;
+
     b(p) = 0;
 end
 
@@ -62,6 +62,11 @@ for j = 1:nj+2
     a_ij(idx) = 1;
     idx = idx+1;
     
+    idx_Ai(idx) = p;
+    idx_Aj(idx) = p-1;
+    a_ij(idx) = -1;
+    idx = idx+1;
+
     b(p) = 0;
 end
 
@@ -79,6 +84,11 @@ for i = 1:ni+2
     a_ij(idx) = 1;
     idx = idx+1;
     
+    idx_Ai(idx) = p;
+    idx_Aj(idx) = p+(ni+2);
+    a_ij(idx) = -1;
+    idx = idx+1;
+
     b(p) = 0;
 end
 
@@ -96,6 +106,11 @@ for i = 1:ni+2
     a_ij(idx) = 1;
     idx = idx+1;
     
+    idx_Ai(idx) = p;
+    idx_Aj(idx) = p-(ni+2);
+    a_ij(idx) = -1;
+    idx = idx+1;
+
     b(p) = 0;
 end
 
