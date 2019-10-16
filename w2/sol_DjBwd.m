@@ -4,11 +4,11 @@ function [ result ] = DjBwd( I, hj )
 
     if (~exist('hj', 'var'))
         hj=1;
-    end;
+    end
 
     result=I;
     %Begin To Complete 11
-    result(:, 2:end) = (I(:, 2:end)-I(:, 1:end-1))./hj; %result(:, 2:end)
+    result(:, 2:end) = (I(:, 2:end)-I(:, 1:end-1))./hj;
     %End To Complete 11
 end
 
