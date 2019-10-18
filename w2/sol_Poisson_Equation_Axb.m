@@ -30,6 +30,7 @@ idx = 1;
 %North side boundary conditions
 i = 1;
 for j = 1:nj+2
+
     %from image matrix (i,j) coordinates to vectorial (p) coordinate
     p = (j-1)*(ni+2)+i;
     
@@ -121,13 +122,12 @@ for j = 2:nj+1
         %from image matrix (i,j) coordinates to vectorial (p) coordinate
         p = (j-1)*(ni+2)+i;
                                             
-        if (dom2Inp_ext(i,j)==1) %If we have to inpaint this pixel
-            
+        if (dom2Inp_ext(i,j)==1) %If we have to inpaint this pixel 
             %Fill Idx_Ai, idx_Aj and a_ij with the corresponding values and
             %vector b
             %TO COMPLETE 5
             idx_Ai(idx)= p;
-            idx_Aj(idx) = p;
+            idx_Aj(idx)= p;
             a_ij(idx) = -4;
             idx = idx+1;
 
@@ -174,6 +174,7 @@ end
     %matrix
     %TO COMPLETE 7
     A = sparse(idx_Ai, idx_Aj, a_ij, nPixels, nPixels); %??? and ???? is the size of matrix A
+
     
     %Solve the sistem of equations
     x = mldivide(A,b);
