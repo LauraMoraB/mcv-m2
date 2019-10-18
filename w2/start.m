@@ -15,7 +15,7 @@ for nC = 1: nChannels
     
     %TO DO: COMPLETE the ??
     %[drivingGrad_i, drivingGrad_j] = importGradients(src(:,:,nC));
-    [drivingGrad_i, drivingGrad_j] = mixGradients(src(:,:,nC), dst(:,:,nC));
+    [drivingGrad_i, drivingGrad_j] = mixGradients(src(:,:,nC), dst(:,:,nC), mask_src, mask_dst);
 
     driving_on_src = divergence(drivingGrad_i, drivingGrad_j);
     
@@ -35,7 +35,7 @@ for nC = 1: nChannels
     
     %TO DO: COMPLETE the ??
     %[drivingGrad_i, drivingGrad_j] = importGradients(src(:,:,nC));
-    [drivingGrad_i, drivingGrad_j] = mixGradients(src(:,:,nC), dst(:,:,nC));
+    [drivingGrad_i, drivingGrad_j] = mixGradients(src(:,:,nC), dst(:,:,nC), mask_src, mask_dst);
 
     driving_on_src = divergence(drivingGrad_i, drivingGrad_j);
     
@@ -56,12 +56,18 @@ function [drivingGrad_i, drivingGrad_j] = importGradients(src)
     drivingGrad_j = srcGrad_j;
 end
 
-function [drivingGrad_i, drivingGrad_j] = mixGradients(src, dst)
+function [drivingGrad_i, drivingGrad_j] = mixGradients(src, dst, mask_src, mask_dst)
     [srcGrad_i, srcGrad_j] = gradient(src);
     [dstGrad_i, dstGrad_j] = gradient(dst);
+    srcGrad_i = srcGrad_i(mask_src(:));
+    srcGrad_j = srcGrad_j(mask_src(:));
+    dstGrad_i = dstGrad_i(mask_dst(:));
+    dstGrad_j = dstGrad_j(mask_dst(:));
     cond = magnitude(srcGrad_i, srcGrad_j) > magnitude(dstGrad_i, dstGrad_j);
-    drivingGrad_i = where(cond, srcGrad_i, dstGrad_i);
-    drivingGrad_j = where(cond, srcGrad_j, dstGrad_j);
+    drivingGrad_i = zeros(size(src));
+    drivingGrad_j = zeros(size(src));
+    drivingGrad_i(mask_src(:)) = where(cond, srcGrad_i, dstGrad_i);
+    drivingGrad_j(mask_src(:)) = where(cond, srcGrad_j, dstGrad_j);
 end
 
 function [result] = magnitude(gx, gy)
