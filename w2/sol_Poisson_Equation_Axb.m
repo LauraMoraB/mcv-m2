@@ -178,7 +178,7 @@ end
     
     %Solve the sistem of equations
     %x = mldivide(A,b);
-    x = gauss_seidel(A,b);
+    x = gauss_seidel(A,b,reshape(f_ext, [nPixels, 1]),struct('omega',1.5));
     
     %From vector to matrix
     u_ext = reshape(x, ni+2, nj+2);

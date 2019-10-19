@@ -48,6 +48,7 @@ for nC = 1: nChannels
 end
 
 imshow(dst1/256)
+imwrite(dst1, 'results/lena_girl.png')
 
 %%Auxiliary functions
 function [drivingGrad_i, drivingGrad_j] = importGradients(src)
