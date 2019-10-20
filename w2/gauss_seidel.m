@@ -2,7 +2,7 @@ function x = gauss_seidel(A, b, x, args)
     if isfield(args, 'iters')
         iters = args.iters;
     else
-        iters = 100;
+        iters = 1000;
     end
     if isfield(args, 'tol')
         tol = args.tol;
@@ -21,10 +21,10 @@ function x = gauss_seidel(A, b, x, args)
         for i = 1:n
             x(i) = (1-omega)*x(i) + (omega/A(i,i)) * (b(i) - A(i,:)*x + A(i,i)*x(i));
         end
-        r = norm(x-x_old);
-        if r < tol
+        err = norm(x-x_old);
+        fprintf('iter %03d, error: %.6f\n', k, err);
+        if err < tol
             break;
         end
-        disp(r);
     end
 end
