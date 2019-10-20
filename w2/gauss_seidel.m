@@ -1,4 +1,4 @@
-function x = gauss_seidel(A, b, x, args)
+function [x, time] = gauss_seidel(A, b, x, args)
     if isfield(args, 'iters')
         iters = args.iters;
     else
@@ -14,8 +14,9 @@ function x = gauss_seidel(A, b, x, args)
     else
         omega = 1;
     end
+    
     n = size(A,1);
-
+    tic
     for k = 1:iters
         x_old = x;
         for i = 1:n
@@ -27,4 +28,5 @@ function x = gauss_seidel(A, b, x, args)
             break;
         end
     end
+    time = toc;
 end

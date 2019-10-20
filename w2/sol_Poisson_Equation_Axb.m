@@ -178,14 +178,13 @@ function [u, timeElapsed] = sol_Poisson_Equation_Axb(f, dom2Inp, param)
 
 
     %Solve the sistem of equations
-    %x = mldivide(A,b);
+    % x = mldivide(A,b);
+    if param.only_mask
+        [x, timeElapsed] = solve(A,b,flatten(f_ext), dom2Inp_ext, param.num_method);
+    else
+        [x, timeElapsed] = gradient_descent(A, b, f_ext(:), struct('tol', 1e-2) );
+    end
     
-    [x, timeElapsed] = solve(A,b,flatten(f_ext), dom2Inp_ext);
-   % Aixi sembla que noo
-   %tic
-   % x = gradient_descent(A, b, f_ext(:), struct('iters', 50) );
-   % timeElapsed = toc;
-
     %From vector to matrix
     u_ext = reshape(x, ni+2, nj+2);
 
@@ -194,17 +193,21 @@ function [u, timeElapsed] = sol_Poisson_Equation_Axb(f, dom2Inp, param)
 
 end
 
-function [x, timeElapsed] = solve(A,b,x,mask)
+function [x, timeElapsed] = solve(A,b,x,mask, num_method)
     mask = dilate(mask, 3);
     mask = flatten(mask==1);
     A_mask = A(mask,mask);
     b_mask = b(mask);
     x_mask = x(mask);
-    tic
-    %x_mask = gauss_seidel(A_mask,b_mask,x_mask, struct('omega',1.5));
-    % Aixi funciona!
-    x_mask = gradient_descent(A_mask,b_mask,x_mask, struct('iters', 5000));
-    timeElapsed = toc;
+    
+    if num_method == "seidel"
+        [x_mask, timeElapsed] = gauss_seidel(A_mask,b_mask,x_mask, struct('omega',1.5));
+    elseif num_method == "gradient"
+        [x_mask, timeElapsed] = gradient_descent(A_mask,b_mask,x_mask, struct('tol', 1e-2));
+    else
+        fprintf("Error in numerical method %", num_method);
+        return
+    end
     x(mask) = x_mask;
 end
 

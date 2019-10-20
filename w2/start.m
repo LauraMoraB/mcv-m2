@@ -16,6 +16,10 @@ dst=double(dst);
 param.hi=1;
 param.hj=1;
 
+%%% SELECT NUMERICAL METHOD AND MASK USAGE
+param.only_mask = true;
+param.num_method = "gradient"; % seidel or gradient
+
 
 for nC = 1: nChannels
     
@@ -29,7 +33,7 @@ for nC = 1: nChannels
     driving_on_dst(mask_dst(:)) = driving_on_src(mask_src(:));
     
     param.driving = driving_on_dst;
-    [dst1(:,:,nC),t] = sol_Poisson_Equation_Axb(dst(:,:,nC), mask_dst, param);
+    [dst1(:,:,nC), t] = sol_Poisson_Equation_Axb(dst(:,:,nC), mask_dst, param);
     
 end
 imshowpair(dst/256, dst1/256, 'montage')
@@ -43,6 +47,9 @@ src = double(imread('images/girl.png')); % flipped girl, because of the eyes
 param.hi=1;
 param.hj=1;
 
+%%% SELECT NUMERICAL METHOD AND MASK USAGE
+param.only_mask = true;
+param.num_method = "seidel";
 
 %Eyes
 mask_src=logical(imread('images/mask_src_eyes.png'));
