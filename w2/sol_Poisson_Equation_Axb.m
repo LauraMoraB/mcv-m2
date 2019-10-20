@@ -1,4 +1,4 @@
-function [u] = sol_Poisson_Equation_Axb(f, dom2Inp, param)
+function [u, timeElapsed] = sol_Poisson_Equation_Axb(f, dom2Inp, param)
     %this code is not intended to be efficient.
 
     [ni, nj] = size(f);
@@ -179,22 +179,32 @@ function [u] = sol_Poisson_Equation_Axb(f, dom2Inp, param)
 
     %Solve the sistem of equations
     %x = mldivide(A,b);
-    x = solve(A,b,flatten(f_ext),dom2Inp_ext);
+    
+    [x, timeElapsed] = solve(A,b,flatten(f_ext), dom2Inp_ext);
+   % Aixi sembla que noo
+   %tic
+   % x = gradient_descent(A, b, f_ext(:), struct('iters', 50) );
+   % timeElapsed = toc;
 
     %From vector to matrix
     u_ext = reshape(x, ni+2, nj+2);
 
     %Eliminate the ghost boundaries
     u = full(u_ext(2:end-1, 2:end-1));
+
 end
 
-function x = solve(A,b,x,mask)
+function [x, timeElapsed] = solve(A,b,x,mask)
     mask = dilate(mask, 3);
     mask = flatten(mask==1);
     A_mask = A(mask,mask);
     b_mask = b(mask);
     x_mask = x(mask);
-    x_mask = gauss_seidel(A_mask,b_mask,x_mask,struct('omega',1.5));
+    tic
+    %x_mask = gauss_seidel(A_mask,b_mask,x_mask, struct('omega',1.5));
+    % Aixi funciona!
+    x_mask = gradient_descent(A_mask,b_mask,x_mask, struct('iters', 5000));
+    timeElapsed = toc;
     x(mask) = x_mask;
 end
 
