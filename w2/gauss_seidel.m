@@ -1,4 +1,4 @@
-function [x, time] = gauss_seidel(A, b, x, args)
+function x = gauss_seidel(A, b, x, args)
     if isfield(args, 'iters')
         iters = args.iters;
     else
@@ -28,5 +28,6 @@ function [x, time] = gauss_seidel(A, b, x, args)
             break;
         end
     end
-    time = toc;
+    elapsedTime = toc;
+    fprintf('Gauss-Seidel took %.3fs\n', elapsedTime);
 end
