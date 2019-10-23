@@ -58,14 +58,17 @@ function [drivingGrad_i, drivingGrad_j] = importGradients(src)
 end
 
 function [drivingGrad_i, drivingGrad_j] = mixGradients(src, dst, mask_src, mask_dst)
+    %Compute gradients
     [srcGrad_i, srcGrad_j] = gradient(src);
     [dstGrad_i, dstGrad_j] = gradient(dst);
+    %Keep only gradients corresponding to the masked regions
     srcGrad_i = srcGrad_i(mask_src(:));
     srcGrad_j = srcGrad_j(mask_src(:));
     dstGrad_i = dstGrad_i(mask_dst(:));
     dstGrad_j = dstGrad_j(mask_dst(:));
-    %Keep gradient with higher magnitude
+    %Keep gradient with larger magnitude
     cond = magnitude(srcGrad_i, srcGrad_j) > magnitude(dstGrad_i, dstGrad_j);
+    %Paste gradients onto final position
     drivingGrad_i = zeros(size(src));
     drivingGrad_j = zeros(size(src));
     drivingGrad_i(mask_src(:)) = where(cond, srcGrad_i, dstGrad_i);

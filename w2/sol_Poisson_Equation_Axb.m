@@ -57,7 +57,6 @@ function [u] = sol_Poisson_Equation_Axb(f, dom2Inp, param)
 
         %Fill Idx_Ai, idx_Aj and a_ij with the corresponding values and
         %vector b
-        %TO COMPLETE 2
         idx_Ai(idx)= p;
         idx_Aj(idx) = p;
         a_ij(idx) = 1;
@@ -79,7 +78,6 @@ function [u] = sol_Poisson_Equation_Axb(f, dom2Inp, param)
 
         %Fill Idx_Ai, idx_Aj and a_ij with the corresponding values and
         %vector b
-        %TO COMPLETE 3
         idx_Ai(idx)= p;
         idx_Aj(idx) = p;
         a_ij(idx) = 1;
@@ -101,7 +99,6 @@ function [u] = sol_Poisson_Equation_Axb(f, dom2Inp, param)
 
         %Fill Idx_Ai, idx_Aj and a_ij with the corresponding values and
         %vector b
-        %TO COMPLETE 4
         idx_Ai(idx)= p;
         idx_Aj(idx) = p;
         a_ij(idx) = 1;
@@ -125,7 +122,6 @@ function [u] = sol_Poisson_Equation_Axb(f, dom2Inp, param)
             if (dom2Inp_ext(i,j)==1) %If we have to inpaint this pixel
                 %Fill Idx_Ai, idx_Aj and a_ij with the corresponding values and
                 %vector b
-                %TO COMPLETE 5
                 idx_Ai(idx)= p;
                 idx_Aj(idx)= p;
                 a_ij(idx) = -4;
@@ -160,7 +156,6 @@ function [u] = sol_Poisson_Equation_Axb(f, dom2Inp, param)
 
                 %Fill Idx_Ai, idx_Aj and a_ij with the corresponding values and
                 %vector b
-                %TO COMPLETE 6
                 idx_Ai(idx)= p;
                 idx_Aj(idx) = p;
                 a_ij(idx) = 1;
@@ -173,12 +168,11 @@ function [u] = sol_Poisson_Equation_Axb(f, dom2Inp, param)
 
     %A is a sparse matrix, so for memory requirements we create a sparse
     %matrix
-    %TO COMPLETE 7
-    A = sparse(idx_Ai, idx_Aj, a_ij, nPixels, nPixels); %??? and ???? is the size of matrix A
+    A = sparse(idx_Ai, idx_Aj, a_ij, nPixels, nPixels);
 
 
     %Solve the sistem of equations
-    % x = mldivide(A,b);
+    %x = mldivide(A,b);
     if param.optimize
         x = solve(A, b, f_ext(:), dom2Inp_ext);
     else
