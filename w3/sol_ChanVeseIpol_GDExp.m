@@ -1,4 +1,4 @@
-function [ phi ] = sol_ChanVeseIpol_GDExp( I, phi_0, mu, nu, eta, lambda1, lambda2, tol, epHeaviside, dt, iterMax, reIni )
+function [seg] = sol_ChanVeseIpol_GDExp(I, phi_0, mu, nu, eta, lambda1, lambda2, tol, epHeaviside, dt, iterMax, reIni)
 %Implementation of the Chan-Vese segmentation following the explicit
 %gradient descent in the paper of Pascal Getreur "Chan-Vese Segmentation".
 %It is the equation 19 from that paper
@@ -19,28 +19,21 @@ function [ phi ] = sol_ChanVeseIpol_GDExp( I, phi_0, mu, nu, eta, lambda1, lambd
 hi=1;
 hj=1;
 
-
 phi=phi_0;
-dif=inf;
-nIter=0;
-while dif>tol && nIter<iterMax
-    
+for nIter = 1:iterMax
     phi_old=phi;
-    nIter=nIter+1;        
-    
     
     %Fixed phi, Minimization w.r.t c1 and c2 (constant estimation)
     H = heavisideReg(phi, epHeaviside);
-    c1 = sum(I.*H) / sum(H); %TODO 1: Line to complete
-    c2 = sum(I.*(1-H)) / sum(1-H); %TODO 2: Line to complete
-    
+    c1 = mean(I(:).*H(:)); %TODO 1: Line to complete
+    c2 = mean(I(:).*(1-H(:))); %TODO 2: Line to complete
+
     %Boundary conditions
     phi(1,:)   = phi(2,:); %TODO 3: Line to complete
     phi(end,:) = phi(end-1,:); %TODO 4: Line to complete
 
     phi(:,1)   = phi(:,2); %TODO 5: Line to complete
     phi(:,end) = phi(:,end-1); %TODO 6: Line to complete
-
     
     %Regularized Dirac's Delta computation
     delta_phi = sol_diracReg(phi, epHeaviside);   %notice delta_phi=H'(phi)	
@@ -63,18 +56,24 @@ while dif>tol && nIter<iterMax
     A = mu ./ (sqrt(eta^2 + phi_iFwd.^2 + phi_jcent.^2)); %TODO 13: Line to complete
     B = mu ./ (sqrt(eta^2 + phi_icent.^2 + phi_jFwd.^2)); %TODO 14: Line to complete
     
+    C1 = mu ./ (sqrt(eta^2 + phi_iFwd.^2 + phi_jcent.^2));
+    C2 = mu ./ (sqrt(eta^2 + phi_iBwd.^2 + phi_jcent.^2));
+    C3 = mu ./ (sqrt(eta^2 + phi_icent.^2 + phi_jFwd.^2));
+    C4 = mu ./ (sqrt(eta^2 + phi_icent.^2 + phi_jBwd.^2));
     
     %%Equation 22, for inner points
     for i = 2:ni-1
         for j = 2:nj-1
-            phi(i,j) = (phi(i,j) + dt*delta_phi(i,j)* ...
-                (A(i,j)*phi(i+1,j) + A(i-1,j)*phi(i-1,j) + ...
-                B(i,j)*phi(i,j+1) + B(i,j-1)*phi(i,j-1) - ...
-                nu - lambda1*((I(i,j)-c1)^2) + lambda2*((I(i,j)-c2)^2))) / ...
-                (1 + dt*delta_phi(i,j)*(A(i,j) + A(i-1,j) + B(i,j) + B(i, j-1))); %TODO 15: Line to complete
+            K = C1(i,j)*phi(i+1,j) + C2(i,j)*phi(i-1,j) + ...
+                C3(i,j)*phi(i,j+1) + C4(i,j)*phi(i,j-1);
+            differenceFromAverage = (- lambda1 * (I(i,j)-c1)^2 + ...
+                                     lambda2 * (I(i,j)-c2)^2);
+            phi(i,j) = (phi(i,j) + (dt*delta_phi(i,j)) * ...
+                        (K - nu + differenceFromAverage));
+            phi(i,j) = (phi(i,j) / (1 + (dt*delta_phi(i,j)) * ...
+                        (C1(i,j) + C2(i,j) + C3(i,j) + C4(i,j)))); %TODO 15: Line to complete
         end
     end
-    
             
     %Reinitialization of phi
     if reIni>0 && mod(nIter, reIni)==0
@@ -91,9 +90,15 @@ while dif>tol && nIter<iterMax
     %Diference. This stopping criterium has the problem that phi can
     %change, but not the zero level set, that it really is what we are
     %looking for.
-    dif = mean(sum( (phi(:) - phi_old(:)).^2 ))
+    dif = sqrt(mean((phi(:) - phi_old(:)).^2));
+
+    fprintf('iter: %d, dif: %.4f\n',nIter,dif);
+
+    if nIter>=3 && dif <= tol
+        break;
+    end
           
-    if mod(nIter, 100)==0
+    if mod(nIter, 100)==1
         %Plot the level sets surface
         subplot(1,2,1) 
             %The level set function
@@ -115,6 +120,7 @@ while dif>tol && nIter<iterMax
             axis off;
             hold off
         drawnow;
-        pause(.0001); 
     end
 end
+
+seg = phi > 0;
