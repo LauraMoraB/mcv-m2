@@ -8,7 +8,10 @@ clc
 %I=double(imread('noisedCircles.tif'));
 %I=double(imread('phantom17.bmp'));
 %I=double(imread('phantom18.bmp'));
-I=double(imread('wrench.bmp'));
+%I=double(imread('wrench.bmp'));
+%I=double(imread('camera.png'));
+%I=double(imread('cell.png'));
+I=double(imread('coins.png'));
 
 %Normalization of the image to [0 1]
 I=mean(I,3);
@@ -35,7 +38,7 @@ epHeaviside=1;
 eta=1e-8;
 tol=1e-3;
 dt=0.5;
-iterMax=100000;
+iterMax=10000;
 reIni=0;
 
 %%Initial phi

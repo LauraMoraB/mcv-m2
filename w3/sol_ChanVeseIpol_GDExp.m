@@ -24,7 +24,8 @@ for nIter = 1:iterMax
     phi_old=phi;
     
     %Fixed phi, Minimization w.r.t c1 and c2 (constant estimation)
-    H = heavisideReg(phi, epHeaviside);
+    %H = heavisideReg(phi, epHeaviside);
+    H = (phi >= 0);
     c1 = mean(I(:).*H(:)); %TODO 1: Line to complete
     c2 = mean(I(:).*(1-H(:))); %TODO 2: Line to complete
 
@@ -92,7 +93,7 @@ for nIter = 1:iterMax
     %looking for.
     dif = sqrt(mean((phi(:) - phi_old(:)).^2));
 
-    fprintf('iter: %d, dif: %.4f\n',nIter,dif);
+    fprintf('iter: %d, dif: %.6f\n',nIter,dif);
 
     if nIter>=3 && dif <= tol
         break;
@@ -105,7 +106,7 @@ for nIter = 1:iterMax
             surfc(phi, 'LineStyle','none')  %TODO 16: Line to complete 
             hold on
             %The zero level set over the surface
-            contour(phi); %TODO 17: Line to complete
+            contour(phi, 'LineColor', 'blue'); %TODO 17: Line to complete
             hold off
             title('Phi Function');
 
@@ -114,7 +115,7 @@ for nIter = 1:iterMax
             imagesc(I);        
             colormap gray;
             hold on;
-            contour(phi) %TODO 18: Line to complete
+            contour(phi, 'LineColor', 'blue') %TODO 18: Line to complete
             title('Image and zero level set of Phi')
 
             axis off;
