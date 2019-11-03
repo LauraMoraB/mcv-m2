@@ -25,56 +25,52 @@ for nIter = 1:iterMax
     
     %Fixed phi, Minimization w.r.t c1 and c2 (constant estimation)
     %H = heavisideReg(phi, epHeaviside);
-    H = (phi >= 0);
-    c1 = mean(I(:).*H(:)); %TODO 1: Line to complete
-    c2 = mean(I(:).*(1-H(:))); %TODO 2: Line to complete
+    H = (phi > 0);
+    c1 = sum(I(:) .* H(:)) / sum(H(:)); %TODO 1: Line to complete
+    c2 = sum(I(:) .* ~H(:)) / sum(~H(:)); %TODO 2: Line to complete
+
+    P = zeros(ni+2,nj+2);
+    P(2:end-1,2:end-1) = phi;
 
     %Boundary conditions
-    phi(1,:)   = phi(2,:); %TODO 3: Line to complete
-    phi(end,:) = phi(end-1,:); %TODO 4: Line to complete
+    P(1,:)   = P(2,:); %TODO 3: Line to complete
+    P(end,:) = P(end-1,:); %TODO 4: Line to complete
 
-    phi(:,1)   = phi(:,2); %TODO 5: Line to complete
-    phi(:,end) = phi(:,end-1); %TODO 6: Line to complete
+    P(:,1)   = P(:,2); %TODO 5: Line to complete
+    P(:,end) = P(:,end-1); %TODO 6: Line to complete
     
     %Regularized Dirac's Delta computation
     delta_phi = sol_diracReg(phi, epHeaviside);   %notice delta_phi=H'(phi)	
     
     %derivatives estimation
     %i direction, forward finite differences
-    phi_iFwd  = DiFwd(phi, hi); %TODO 7: Line to complete
-    phi_iBwd  = DiBwd(phi, hi); %TODO 8: Line to complete
+    phi_iFwd  = P(3:end,2:end-1) - P(2:end-1,2:end-1); %TODO 7: Line to complete
+    phi_iBwd  = P(2:end-1,2:end-1) - P(1:end-2,2:end-1); %TODO 8: Line to complete
     
     %j direction, forward finitie differences
-    phi_jFwd  = DjFwd(phi, hj); %TODO 9: Line to complete
-    phi_jBwd  = DjBwd(phi, hj); %TODO 10: Line to complete
+    phi_jFwd  = P(2:end-1,3:end) - P(2:end-1,2:end-1); %TODO 9: Line to complete
+    phi_jBwd  = P(2:end-1,2:end-1) - P(2:end-1,1:end-2); %TODO 10: Line to complete
     
     %centered finite diferences
-    phi_icent   = (phi_iFwd + phi_iBwd) / 2; %TODO 11: Line to complete
-    phi_jcent   = (phi_jFwd + phi_jBwd) / 2; %TODO 12: Line to complete
+    phi_icent   = (P(3:end,2:end-1) - P(1:end-2,2:end-1)) / 2; %TODO 11: Line to complete
+    phi_jcent   = (P(2:end-1,3:end) - P(2:end-1,1:end-2)) / 2; %TODO 12: Line to complete
     
     %A and B estimation (A y B from the Pascal Getreuer's IPOL paper "Chan
     %Vese segmentation
     A = mu ./ (sqrt(eta^2 + phi_iFwd.^2 + phi_jcent.^2)); %TODO 13: Line to complete
     B = mu ./ (sqrt(eta^2 + phi_icent.^2 + phi_jFwd.^2)); %TODO 14: Line to complete
     
-    C1 = mu ./ (sqrt(eta^2 + phi_iFwd.^2 + phi_jcent.^2));
-    C2 = mu ./ (sqrt(eta^2 + phi_iBwd.^2 + phi_jcent.^2));
-    C3 = mu ./ (sqrt(eta^2 + phi_icent.^2 + phi_jFwd.^2));
-    C4 = mu ./ (sqrt(eta^2 + phi_icent.^2 + phi_jBwd.^2));
+    C1 = mu ./ (sqrt(eta^2 + phi_icent.^2 + phi_jFwd.^2));
+    C2 = mu ./ (sqrt(eta^2 + phi_icent.^2 + phi_jBwd.^2));
+    C3 = mu ./ (sqrt(eta^2 + phi_iFwd.^2 + phi_jcent.^2));
+    C4 = mu ./ (sqrt(eta^2 + phi_iBwd.^2 + phi_jcent.^2));
     
     %%Equation 22, for inner points
-    for i = 2:ni-1
-        for j = 2:nj-1
-            K = C1(i,j)*phi(i+1,j) + C2(i,j)*phi(i-1,j) + ...
-                C3(i,j)*phi(i,j+1) + C4(i,j)*phi(i,j-1);
-            differenceFromAverage = (- lambda1 * (I(i,j)-c1)^2 + ...
-                                     lambda2 * (I(i,j)-c2)^2);
-            phi(i,j) = (phi(i,j) + (dt*delta_phi(i,j)) * ...
-                        (K - nu + differenceFromAverage));
-            phi(i,j) = (phi(i,j) / (1 + (dt*delta_phi(i,j)) * ...
-                        (C1(i,j) + C2(i,j) + C3(i,j) + C4(i,j)))); %TODO 15: Line to complete
-        end
-    end
+    K = (P(2:end-1,3:end) .* C1 + P(2:end-1,1:end-2) .* C2 + ...
+         P(3:end,2:end-1) .* C3 + P(1:end-2,2:end-1) .* C4);
+    differenceFromAverage = (- lambda1*(I-c1).^2 + lambda2*(I-c2).^2);
+    phi = (phi + (dt*delta_phi) .* (K - nu + differenceFromAverage)) ./ ...
+           (1. + (dt*delta_phi) .* (C1 + C2 + C3 + C4)); %TODO 15: Line to complete
             
     %Reinitialization of phi
     if reIni>0 && mod(nIter, reIni)==0
@@ -99,7 +95,7 @@ for nIter = 1:iterMax
         break;
     end
           
-    if mod(nIter, 100)==1
+    if mod(nIter, 10)==0
         %Plot the level sets surface
         subplot(1,2,1) 
             %The level set function

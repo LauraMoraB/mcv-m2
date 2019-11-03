@@ -5,13 +5,13 @@ clc
 %I=double(imread('zigzag_mask.png'));
 %I=mean(I,3); %To 2D matrix
 %I=double(imread('circles.png'));
-%I=double(imread('noisedCircles.tif'));
+I=double(imread('noisedCircles.tif'));
 %I=double(imread('phantom17.bmp'));
 %I=double(imread('phantom18.bmp'));
 %I=double(imread('wrench.bmp'));
 %I=double(imread('camera.png'));
 %I=double(imread('cell.png'));
-I=double(imread('coins.png'));
+%I=double(imread('coins.png'));
 
 %Normalization of the image to [0 1]
 I=mean(I,3);
@@ -44,7 +44,7 @@ reIni=0;
 %%Initial phi
 [X, Y]=meshgrid(1:nj, 1:ni);
 %phi_0=(-sqrt( ( X-round(ni/2)).^2 + (Y-round(nj/2)).^2)+50);
-phi_0 = sin(pi/5 * X) .* sin(pi/5 * Y);
+phi_0 = sin(pi/5 * Y) .* sin(pi/5 * X);
 %This initialization allows a faster convergence for phantom 18
 %phi_0=(-sqrt( ( X-round(ni/2)).^2 + (Y-round(nj/4)).^2)+50);
 %For the Hola carola problem
