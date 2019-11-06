@@ -8,10 +8,14 @@ clc
 I=double(imread('noisedCircles.tif'));
 %I=double(imread('phantom17.bmp'));
 %I=double(imread('phantom18.bmp'));
+%I=double(imread('phantom19.bmp'));
 %I=double(imread('wrench.bmp'));
 %I=double(imread('camera.png'));
 %I=double(imread('cell.png'));
 %I=double(imread('coins.png'));
+%I=double(imread('page.png'));
+%I=double(imread('horse.png'));
+%I=double(imread('bw_text.png'));
 
 %Normalization of the image to [0 1]
 I=mean(I,3);

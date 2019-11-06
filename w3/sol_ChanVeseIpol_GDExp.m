@@ -46,7 +46,7 @@ for nIter = 1:iterMax
     P(:,1)   = P(:,2); %TODO 5: Line to complete
     P(:,end) = P(:,end-1); %TODO 6: Line to complete
     
-    % Regularized Dirac's Delta computation
+    %Regularized Dirac's Delta computation
     delta_phi = sol_diracReg(phi, epHeaviside);   %notice delta_phi=H'(phi)	
     
     %Derivatives estimation
@@ -66,15 +66,15 @@ for nIter = 1:iterMax
     %A and B estimation (A y B from the Pascal Getreuer's IPOL paper "Chan
     %Vese segmentation
     % A
-    C1 = mu ./ (sqrt(eta^2 + phi_iFwd.^2 + phi_jcent.^2));
+    C1 = mu ./ (sqrt(eta^2 + phi_iFwd.^2 + phi_jcent.^2)); %TODO 13: Line to complete
     C2 = mu ./ (sqrt(eta^2 + phi_iBwd.^2 + phi_jcent.^2));
     % B
-    C3 = mu ./ (sqrt(eta^2 + phi_icent.^2 + phi_jFwd.^2));
+    C3 = mu ./ (sqrt(eta^2 + phi_icent.^2 + phi_jFwd.^2)); %TODO 14: Line to complete
     C4 = mu ./ (sqrt(eta^2 + phi_icent.^2 + phi_jBwd.^2));
    
     %%Equation 22, for inner points
-    K = (P(2:end-1,3:end) .* C3 + P(2:end-1,1:end-2) .* C4 + ...
-         P(3:end,2:end-1) .* C1 + P(1:end-2,2:end-1) .* C2);
+    K = (P(3:end,2:end-1) .* C1 + P(1:end-2,2:end-1) .* C2 + ...
+         P(2:end-1,3:end) .* C3 + P(2:end-1,1:end-2) .* C4);
    
     differenceFromAverage = (- lambda1*(I-c1).^2 + lambda2*(I-c2).^2);
     
@@ -94,7 +94,6 @@ for nIter = 1:iterMax
     %Diference. This stopping criterium has the problem that phi can
     %change, but not the zero level set, that it really is what we are
     %looking for.
-    fprintf('Phi: %f', mean(phi(:)));
     dif = sqrt(mean((phi(:) - phi_old(:)).^2));
 
     fprintf('iter: %d, dif: %.6f\n',nIter,dif);
@@ -103,7 +102,7 @@ for nIter = 1:iterMax
         break;
     end
           
-    if mod(nIter, 10)==0
+    if mod(nIter, 100)==1
         %Plot the level sets surface
         subplot(1,2,1) 
             %The level set function
