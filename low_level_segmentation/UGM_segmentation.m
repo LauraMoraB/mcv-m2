@@ -3,11 +3,13 @@ close all;
 clc;
 
 im_name='3_12_s.bmp';
+%im_name='2_1_s.bmp';
+%im_name='7_9_s.bmp';
 
 % TODO: Update library path
 % Add  library paths
-basedir='~/Desenvolupament/UGM/';
-addpath(basedir);
+basedir='UGM/';
+addpath(genpath(basedir));
 
 
 
@@ -22,13 +24,14 @@ smooth_term=[0.0 2]; % Potts Model
 im = imread(im_name);
 
 
-NumFils = size(im,1);
-NumCols = size(im,2);
+nRows = size(im,1);
+nCols = size(im,2);
+nNodes = nRows*nCols;
 
 %Convert to LAB colors space
 % TODO: Uncomment if you want to work in the LAB space
 %
-% im = RGB2Lab(im);
+im = RGB2Lab(im);
 
 
 
@@ -38,7 +41,16 @@ NumCols = size(im,2);
 % nodePot = P( color at pixel 'x' | Cluster color 'c' )  
 
 
-nodePot=[];
+im = double(im);
+x=reshape(im, [size(im,1)*size(im,2) size(im,3)]);
+gmm_color = fitgmdist(x, K);
+data_term = gmm_color.posterior(x);
+mu_color = gmm_color.mu;
+[~,c] = max(data_term,[],2);
+nodePot = zeros(nNodes,K);
+for i = 1:nNodes
+    nodePot(i, c(i)) = 1;
+end
 
 
 
@@ -47,19 +59,20 @@ nodePot=[];
 disp('create UGM model');
 
 % Create UGM data
-[edgePot,edgeStruct] = CreateGridUGMModel(NumFils, NumCols, K ,smooth_term);
+[edgePot,edgeStruct] = CreateGridUGMModel(nRows, nCols, K, smooth_term);
 
 
 if ~isempty(edgePot)
 
     % color clustering
-    [~,c] = min(reshape(data_term,[NumFils*NumCols K]),[],2);
+    [~,c] = max(reshape(data_term,[nRows*nCols K]),[],2);
     im_c= reshape(mu_color(c,:),size(im));
     
     % Call different UGM inference algorithms
     display('Loopy Belief Propagation'); tic;
     [nodeBelLBP,edgeBelLBP,logZLBP] = UGM_Infer_LBP(nodePot,edgePot,edgeStruct);toc;
-    im_lbp = max(nodeBelLBP,[],2);
+    [~,c] = max(nodeBelLBP,[],2);
+    im_lbp = reshape(mu_color(c,:),size(im));
     
     % Max-sum
     display('Max-sum'); tic;
