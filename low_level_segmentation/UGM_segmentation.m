@@ -18,7 +18,7 @@ addpath(genpath(basedir));
 K=4; % Number of color clusters (=number of states of hidden variables)
 
 %Pair-wise parameters
-smooth_term=[0.0 2]; % Potts Model
+smooth_term=[0.0 5]; % Potts Model
 
 %Load images
 im = imread(im_name);
@@ -46,11 +46,8 @@ x=reshape(im, [size(im,1)*size(im,2) size(im,3)]);
 gmm_color = fitgmdist(x, K);
 data_term = gmm_color.posterior(x);
 mu_color = gmm_color.mu;
-[~,c] = max(data_term,[],2);
-nodePot = zeros(nNodes,K);
-for i = 1:nNodes
-    nodePot(i, c(i)) = 1;
-end
+
+nodePot = data_term;
 
 
 
