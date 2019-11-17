@@ -2,6 +2,8 @@ clear all;
 close all;
 clc;
 
+rng(42);
+
 im_name='3_12_s.bmp';
 %im_name='2_1_s.bmp';
 %im_name='7_9_s.bmp';
@@ -18,7 +20,8 @@ addpath(genpath(basedir));
 K=4; % Number of color clusters (=number of states of hidden variables)
 
 %Pair-wise parameters
-smooth_term=[0.0 5]; % Potts Model
+smooth_term=[0.0 10]; % Potts Model
+gamma=50; % Contrast-sensitive Model
 
 %Load images
 im = imread(im_name);
@@ -56,7 +59,8 @@ nodePot = data_term;
 disp('create UGM model');
 
 % Create UGM data
-[edgePot,edgeStruct] = CreateGridUGMModel(nRows, nCols, K, smooth_term);
+%[edgePot,edgeStruct] = CreateGridUGMModel(nRows, nCols, K, smooth_term);
+[edgePot,edgeStruct] = CreateGridUGMModelContrast(im, K, gamma);
 
 
 if ~isempty(edgePot)
