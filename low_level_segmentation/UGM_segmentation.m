@@ -60,7 +60,7 @@ disp('create UGM model');
 
 % Create UGM data
 %[edgePot,edgeStruct] = CreateGridUGMModel(nRows, nCols, K, smooth_term);
-[edgePot,edgeStruct] = CreateGridUGMModelContrast(im, K, gamma);
+[edgePot,edgeStruct] = CreateGridUGMModelContrast(im, K, gamma, false);
 
 
 if ~isempty(edgePot)
