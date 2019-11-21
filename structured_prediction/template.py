@@ -39,7 +39,7 @@ labels_segments = []
 segments = []
 for row in it:
     ide = row[1]['ide']
-    segments.append(np.load(os.path.join('segments',ide+'_front.npy')))
+    segments.append(np.load(os.path.join('segments', ide+'_front.npy'), allow_pickle=True, encoding='latin1'))
     labels_segments.append(list(row[1].values[-num_segments_per_jacket:]))
 
 labels_segments = np.array(labels_segments).astype(int)
