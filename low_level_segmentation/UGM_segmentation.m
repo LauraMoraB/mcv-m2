@@ -3,29 +3,29 @@ close all;
 clc;
 
 rng(42);
-
-im_name='3_12_s.bmp';
+%
+%im_name='3_12_s.bmp';
 %im_name='2_1_s.bmp';
-%im_name='7_9_s.bmp';
+im_name='7_9_s.bmp';
 
 % TODO: Update library path
 % Add  library paths
 basedir='UGM/';
 addpath(genpath(basedir));
-
+output = 'results/7_9_s_2_labels50_icm';
 
 
 %Set model parameters
 %cluster color
-K=4; % Number of color clusters (=number of states of hidden variables)
+K=2; % Number of color clusters (=number of states of hidden variables)
 
 %Pair-wise parameters
 smooth_term=[0.0 10]; % Potts Model
 gamma=50; % Contrast-sensitive Model
 
 %Load images
-im = imread(im_name);
-
+im_full = double(imread(im_name));
+im = imresize(im_full, 0.3);
 
 nRows = size(im,1);
 nCols = size(im,2);
@@ -81,20 +81,50 @@ if ~isempty(edgePot)
     im_bp= reshape(mu_color(decodeLBP,:),size(im));
     toc;
     
-    
     % TODO: apply other inference algorithms and compare their performance
-    %
-    % - Graph Cut
-    % - Linear Programing Relaxation
+    fprintf('Running ICM decoding - ');tic;
+    ICMDecoding = UGM_Decode_ICM(nodePot,edgePot,edgeStruct);
+    im_icm= reshape(mu_color(ICMDecoding,:),size(im));
+    toc;
     
-    figure
-    subplot(2,2,1),imshow(Lab2RGB(im));xlabel('Original');
-    subplot(2,2,2),imshow(Lab2RGB(im_c),[]);xlabel('Clustering without GM');
-    subplot(2,2,3),imshow(Lab2RGB(im_bp),[]);xlabel('Max-Sum');
-    subplot(2,2,4),imshow(Lab2RGB(im_lbp),[]);xlabel('Loopy Belief Propagation');
+    if K<=2
+        % Linear Programming
+        fprintf('Lin Prog - '); tic;
+        linProgDecoding = UGM_Decode_LinProg(nodePot,edgePot,edgeStruct);
+        im_lp= reshape(mu_color(linProgDecoding,:),size(im));
+        toc;
+
+        fprintf('Running Graph Cut decoding - ');tic;
+        optimal_GC = UGM_Decode_GraphCut(nodePot,edgePot,edgeStruct);
+        im_graphCut= reshape(mu_color(optimal_GC,:),size(im));
+        toc;
+    end
+    
+    
+    fig=figure;
+    if K<=2
+        subplot(3,3,1),imshow(Lab2RGB(im));xlabel('Original');
+        subplot(3,3,2),imshow(Lab2RGB(im_c),[]);xlabel('Clustering without GM');
+        subplot(3,3,3),imshow(Lab2RGB(im_bp),[]);xlabel('Max-Sum');
+        subplot(3,3,4),imshow(Lab2RGB(im_lbp),[]);xlabel('Loopy Belief Propagation');
+        subplot(3,3,5),imshow(Lab2RGB(im_graphCut),[]);xlabel('Graph Cut');
+        subplot(3,3,6),imshow(Lab2RGB(im_lp),[]);xlabel('Linear Programming');
+        subplot(3,3,7),imshow(Lab2RGB(im_icm),[]);xlabel('ICM');
+
+        
+    else
+        subplot(2,3,1),imshow(Lab2RGB(im));xlabel('Original');
+        subplot(2,3,2),imshow(Lab2RGB(im_c),[]);xlabel('Clustering without GM');
+        subplot(2,3,3),imshow(Lab2RGB(im_bp),[]);xlabel('Max-Sum');
+        subplot(2,3,4),imshow(Lab2RGB(im_lbp),[]);xlabel('Loopy Belief Propagation');
+        subplot(2,3,5),imshow(Lab2RGB(im_icm),[]);xlabel('ICM');
+       
+    end
     
 else
    
     error('You have to implement the CreateGridUGMModel.m function');
 
 end
+
+print(fig,output,'-dpng')
