@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Sep  4 20:15:45 2015
-
-@author: joans
-"""
 import os
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,11 +17,13 @@ sigma_noise = 0.1
 plot_labeling = True
 plot_coefficients = True
 
+measures_path = 'more_samples/man_jacket_hand_measures.xls'
+segments_path = 'more_samples/segments'
+
 """ 
 Load the segments and the groundtruth for all jackets
 """
-path_measures = 'man_jacket_hand_measures.xls'
-xl = ExcelFile(path_measures)
+xl = ExcelFile(measures_path)
 sheet = xl.parse(xl.sheet_names[0])
 """ be careful, parse() just reads literals, does not execute formulas """
 xl.close()
@@ -37,7 +33,7 @@ labels_segments = []
 segments = []
 for row in it:
     ide = row[1]['ide']
-    segments.append(np.load(os.path.join('segments', ide+'_front.npy'), allow_pickle=True, encoding='latin1'))
+    segments.append(np.load(os.path.join(segments_path, ide+'_front.npy'), allow_pickle=True, encoding='latin1'))
     labels_segments.append(list(row[1].values[-num_segments_per_jacket:]))
 
 labels_segments = np.array(labels_segments).astype(int)
@@ -89,7 +85,7 @@ DEFINE HERE YOUR GRAPHICAL MODEL AND CHOOSE ONE LEARNING METHOD
 (OneSlackSSVM, NSlackSSVM, FrankWolfeSSVM)
 """
 model = ChainCRF()
-ssvm = NSlackSSVM(model, verbose=1)
+ssvm = FrankWolfeSSVM(model, verbose=1)
 
 svm = LinearSVC()
 
@@ -187,6 +183,7 @@ if plot_coefficients:
     fig, ax = plt.subplots()
     mat = ax.matshow(np.array(ssvm.w[:num_labels*num_features]).reshape((num_labels, num_features)))
     fig.colorbar(mat, ax=ax)
+    ax.set_yticks(np.arange(num_labels))
     ax.set_yticklabels(name_of_labels)
     plt.show(block=False)
 
@@ -194,6 +191,8 @@ if plot_coefficients:
     fig, ax = plt.subplots()
     mat = ax.matshow(np.array(ssvm.w[-num_labels**2:]).reshape((num_labels, num_labels)))
     fig.colorbar(mat, ax=ax)
+    ax.set_yticks(np.arange(num_labels))
+    ax.set_xticks(np.arange(num_labels))
     ax.set_yticklabels(name_of_labels)
-    ax.set_xticklabels(name_of_labels)
+    ax.set_xticklabels(name_of_labels, rotation=45, ha='left')
     plt.show(block=False)
