@@ -14,11 +14,11 @@ from plot_segments import plot_segments
 num_segments_per_jacket = 40
 add_gaussian_noise_to_features = False
 sigma_noise = 0.1
-plot_labeling = True
+plot_labeling = False
 plot_coefficients = True
 
-measures_path = 'more_samples/man_jacket_hand_measures.xls'
-segments_path = 'more_samples/segments'
+measures_path = 'man_jacket_hand_measures.xls'
+segments_path = 'segments'
 
 """ 
 Load the segments and the groundtruth for all jackets
@@ -178,21 +178,41 @@ if plot_coefficients:
         'right shoulder',
     ]
 
+    name_of_features = [
+        'x0norm',
+        'y0norm',
+        'x1norm',
+        'y1norm',
+        'xcenter',
+        'ycenter',
+        'angle'
+    ]
+
     """ SHOW IMAGE OF THE LEARNED UNARY COEFFICIENTS, size (num_labels, num_features)"""
     """ use matshow() and colorbar()"""
     fig, ax = plt.subplots()
-    mat = ax.matshow(np.array(ssvm.w[:num_labels*num_features]).reshape((num_labels, num_features)))
+    data = np.array(ssvm.w[:num_labels*num_features]).reshape((num_labels, num_features))
+    mat = ax.matshow(data)
     fig.colorbar(mat, ax=ax)
     ax.set_yticks(np.arange(num_labels))
+    ax.set_xticks(np.arange(num_features))
     ax.set_yticklabels(name_of_labels)
+    ax.set_xticklabels(name_of_features, rotation=45, ha='left')
+    for i in range(num_labels):
+        for j in range(num_features):
+            ax.text(j, i, '{:.1f}'.format(data[i, j]), ha='center', va='center', color='w')
     plt.show(block=False)
 
     """ SHOW IMAGE OF PAIRWISE COEFFICIENTS size (num_labels, num_labels)"""
     fig, ax = plt.subplots()
-    mat = ax.matshow(np.array(ssvm.w[-num_labels**2:]).reshape((num_labels, num_labels)))
+    data = np.array(ssvm.w[-num_labels**2:]).reshape((num_labels, num_labels))
+    mat = ax.matshow(data)
     fig.colorbar(mat, ax=ax)
     ax.set_yticks(np.arange(num_labels))
     ax.set_xticks(np.arange(num_labels))
     ax.set_yticklabels(name_of_labels)
     ax.set_xticklabels(name_of_labels, rotation=45, ha='left')
+    for i in range(num_labels):
+        for j in range(num_labels):
+            ax.text(j, i, '{:.1f}'.format(data[i, j]), ha='center', va='center', color='w')
     plt.show(block=False)
