@@ -17,32 +17,35 @@ sigma_noise = 0.1
 plot_labeling = False
 plot_coefficients = True
 
-measures_path = 'man_jacket_hand_measures.xls'
-segments_path = 'segments'
 
-""" 
-Load the segments and the groundtruth for all jackets
-"""
-xl = ExcelFile(measures_path)
-sheet = xl.parse(xl.sheet_names[0])
-""" be careful, parse() just reads literals, does not execute formulas """
-xl.close()
+def load_dataset(measures_path, segments_path):
+    """
+    Load the segments and the groundtruth for all jackets
+    """
+    xl = ExcelFile(measures_path)
+    sheet = xl.parse(xl.sheet_names[0])
+    """ be careful, parse() just reads literals, does not execute formulas """
+    xl.close()
 
-it = sheet.iterrows()
-labels_segments = []
-segments = []
-for row in it:
-    ide = row[1]['ide']
-    segments.append(np.load(os.path.join(segments_path, ide+'_front.npy'), allow_pickle=True, encoding='latin1'))
-    labels_segments.append(list(row[1].values[-num_segments_per_jacket:]))
+    it = sheet.iterrows()
+    labels = []
+    features = []
+    for row in it:
+        ide = row[1]['ide']
+        features.append(np.load(os.path.join(segments_path, ide+'_front.npy'), allow_pickle=True, encoding='latin1'))
+        labels.append(list(row[1].values[-num_segments_per_jacket:]))
 
+    return features, labels
+
+
+segments, labels_segments = [], []
+features, labels = load_dataset('man_jacket_hand_measures.xls', 'segments')
+segments.extend(features)
+labels_segments.extend(labels)
+features, labels = load_dataset('more_samples/man_jacket_hand_measures.xls', 'more_samples/segments')
+segments.extend(features)
+labels_segments.extend(labels)
 labels_segments = np.array(labels_segments).astype(int)
-
-"""
-Show groundtruth for 3rd jacket
-"""
-n = 2
-plot_segments(segments[n], sheet.ide[n], labels_segments[n])
 
 """ 
 Make matrices X of shape (number of jackets, number of features) 
@@ -85,7 +88,7 @@ DEFINE HERE YOUR GRAPHICAL MODEL AND CHOOSE ONE LEARNING METHOD
 (OneSlackSSVM, NSlackSSVM, FrankWolfeSSVM)
 """
 model = ChainCRF()
-ssvm = FrankWolfeSSVM(model, verbose=1)
+ssvm = FrankWolfeSSVM(model, C=1e4, verbose=1)
 
 svm = LinearSVC()
 
@@ -198,9 +201,9 @@ if plot_coefficients:
     ax.set_xticks(np.arange(num_features))
     ax.set_yticklabels(name_of_labels)
     ax.set_xticklabels(name_of_features, rotation=45, ha='left')
-    for i in range(num_labels):
-        for j in range(num_features):
-            ax.text(j, i, '{:.1f}'.format(data[i, j]), ha='center', va='center', color='w')
+    #for i in range(num_labels):
+    #    for j in range(num_features):
+    #        ax.text(j, i, '{:.1f}'.format(data[i, j]), ha='center', va='center', color='w')
     plt.show(block=False)
 
     """ SHOW IMAGE OF PAIRWISE COEFFICIENTS size (num_labels, num_labels)"""
@@ -212,7 +215,7 @@ if plot_coefficients:
     ax.set_xticks(np.arange(num_labels))
     ax.set_yticklabels(name_of_labels)
     ax.set_xticklabels(name_of_labels, rotation=45, ha='left')
-    for i in range(num_labels):
-        for j in range(num_labels):
-            ax.text(j, i, '{:.1f}'.format(data[i, j]), ha='center', va='center', color='w')
+    #for i in range(num_labels):
+    #    for j in range(num_labels):
+    #        ax.text(j, i, '{:.1f}'.format(data[i, j]), ha='center', va='center', color='w')
     plt.show(block=False)
